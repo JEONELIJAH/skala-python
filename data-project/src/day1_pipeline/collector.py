@@ -1,4 +1,7 @@
-import asyncio, httpx, logging
+import asyncio
+import logging
+
+import httpx
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -24,7 +27,7 @@ async def fetch_api(client, url, name):
     except httpx.HTTPStatusError as e:
         logger.error(f"❌ [{name}] HTTP 에러 발생: {e.response.status_code}")
         return {"name": name, "error": str(e)}
-    except Exception as e:
+    except httpx.RequestError as e:
         logger.error(f"❌ [{name}] API 연결 실패: {e}")
         return {"name": name, "error": str(e)}
 

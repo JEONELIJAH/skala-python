@@ -1,7 +1,9 @@
 import asyncio
+
 from collector import collect_all_data
 from schemas import validate_data
 from storage import save_and_compare_performance
+
 
 # 데이터 수집, 검증, 저장을 통합 실행하는 파이프라인 메인 함수입니다.
 def run_data_pipeline():

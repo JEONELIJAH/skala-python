@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+
 from pydantic import BaseModel, Field, ValidationError
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ class CountryRecord(BaseModel):
     flag: str
     name: str = Field(min_length=1)
     region: str = Field(min_length=1)
-    subregion: Optional[str] = None
+    subregion: str | None = None
     population: int = Field(ge=0)
 
 class IpRecord(BaseModel):
@@ -25,7 +25,7 @@ class IpRecord(BaseModel):
     city: str = Field(min_length=1)
     lat: float = Field(ge=-90, le=90)
     lon: float = Field(ge=-180, le=180)
-    isp: Optional[str] = None
+    isp: str | None = None
 
 
 # 데이터 추출 및 검증 파이프라인
