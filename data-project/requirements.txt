@@ -1,0 +1,13 @@
+# API 통신 및 비동기 처리
+httpx
+
+# 스키마 검증
+pydantic>=2.0.0
+
+# 테스트 및 코드 컨벤션
+pytest
+ruff
+
+# 데이터 저장 및 파일 I/O (CSV, Parquet)
+pandas
+pyarrow
