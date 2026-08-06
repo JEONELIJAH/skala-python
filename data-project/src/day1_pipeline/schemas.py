@@ -61,8 +61,6 @@ def validate_data(raw_data):
 
         print(f"✅ [Weather] 데이터 검증 통과 (총 {len(validated_results['weather'])}건 정상)")
 
-    print("--- 검증 종료 ---\n")
-
     # 2) Country 데이터 검증
     if raw_country := raw_data.get("country"):
         try:
@@ -83,4 +81,5 @@ def validate_data(raw_data):
         except ValidationError as e:
             logger.error(f"❌ [IP] 검증 실패:\n{e}")
 
+    print("--- 검증 종료 ---\n")
     return validated_results
