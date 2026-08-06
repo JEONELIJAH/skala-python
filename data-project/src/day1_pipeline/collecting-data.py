@@ -54,11 +54,22 @@ async def collect_all_data():
         return collected_data
 
 if __name__ == "__main__":
+    from schemas import validate_data
+
     # asyncio.run()로 이벤트 루프를 시작합니다.
     raw_data = asyncio.run(collect_all_data())
+
+    # 수집한 데이터를 정의한 Pydantic schemas에서 검증합니다.
+    validated_data = validate_data(raw_data)
     
-    # 데이터가 들어왔는지 키값으로 확인합니다.
-    print("수집된 데이터 키 목록:", raw_data.keys())
-    
-    if raw_data.get("ip"):
-        print(f"IP 정보 샘플: {raw_data['ip'].get('city')}, {raw_data['ip'].get('isp')}")
+    # 객체로 변환된 결과물을 확인합니다.
+    print("\n[데이터 확인]")
+    if weather_list := validated_data.get("weather"):
+        # Pydantic 객체에 model_dump()를 사용해서 딕셔너리로 불 수 있게 했습니다.
+        print(f"날씨 정보: {weather_list[0].model_dump()}")
+
+    if validated_data.get("ip"):
+        print(f"IP 정보: {validated_data['ip'].model_dump()}")
+        
+    if validated_data.get("country"):
+        print(f"국가 정보: {validated_data['country'].model_dump()}")
