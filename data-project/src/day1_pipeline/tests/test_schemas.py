@@ -1,6 +1,16 @@
+"""
+파일명: test_schemas.py
+작성자: 전우진 P267
+작성일: 2026-08-06
+설명: pytest를 활용하여 Pydantic 스키마가 
+      정상 및 예외 데이터에 대해 의도대로 검증을 수행하는지 확인하는 단위 테스트 모듈입니다.
+"""
+
 import pytest
 from pydantic import ValidationError
-from schemas import WeatherRecord, IpRecord
+
+from schemas import IpRecord, WeatherRecord
+
 
 # 올바른 날씨 데이터가 주어졌을 때 정상적으로 객체가 생성되는지 검증합니다.
 def test_weather_record_valid():

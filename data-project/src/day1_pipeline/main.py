@@ -1,3 +1,11 @@
+"""
+파일명: main.py
+작성자: 전우진 P267
+작성일: 2026-08-06
+설명: 비동기 API 수집, Pydantic 스키마 검증, 파일 저장 및 성능 측정까지
+      전체 데이터 파이프라인의 흐름을 제어하는 메인 모듈입니다.
+"""
+
 import asyncio
 
 from collector import collect_all_data

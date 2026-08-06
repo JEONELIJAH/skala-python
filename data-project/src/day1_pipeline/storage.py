@@ -1,3 +1,11 @@
+"""
+파일명: storage.py
+작성자: 전우진 P267
+작성일: 2026-08-06
+설명: 정제된 파이썬 객체 데이터를 Pandas DataFrame으로 변환한 뒤, 
+      CSV와 Parquet 포맷으로 각각 저장하고 처리 시간을 비교 측정합니다.
+"""
+
 import logging
 import os
 import time

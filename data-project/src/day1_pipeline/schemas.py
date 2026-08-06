@@ -1,3 +1,11 @@
+"""
+파일명: schemas.py
+작성자: 전우진 P267
+작성일: 2026-08-06
+설명: Pydantic를 활용하여 수집된 원시 데이터의 타입, 필수 값, 
+      유효 범위를 검증하고 내부 객체로 정제합니다.
+"""
+
 import logging
 
 from pydantic import BaseModel, Field, ValidationError

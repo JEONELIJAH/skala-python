@@ -1,3 +1,11 @@
+"""
+파일명: collector.py
+작성자: 전우진 P267
+작성일: 2026-08-06
+설명: httpx와 asyncio를 활용하여 외부 API 데이터를 
+      비동기 방식으로 동시에 수집하는 모듈입니다.
+"""
+
 import asyncio
 import logging
 
