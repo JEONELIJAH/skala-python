@@ -96,5 +96,37 @@ def process_pandas_agg(df):
         return None
 # --------------------------------------------------------------------
 
+# 3) Polars Lazy API로 동일 집계 작성
+# --------------------------------------------------------------------
+def process_polars_lazy(csv_path, lower, upper):
+    """
+    Polars의 Lazy API를 활용하여 데이터를 처리합니다.
+    """
+    try:
+        print("\n--- 3. Polars Lazy API 집계 ---")
+        
+        # read_csv 대신 scan_csv를 사용하여 실행 계획 수립 후 collect()하도록 했습니다.
+        pl_result = (
+            pl.scan_csv(csv_path)
+            .filter(pl.col('amount').is_between(lower, upper))
+            .group_by(['region', 'category'])
+            .agg(
+                pl.col('amount').sum().alias('total'),
+                pl.col('amount').mean().alias('mean'),
+                pl.col('amount').count().alias('count')
+            )
+            .sort('total', descending=True)
+            .collect() # collect()를 호출해 실행합니다.
+        )
+        
+        print(pl_result.head())
+        return pl_result
+    
+    except Exception as e:
+        logger.error(f"❌ Polars 처리 중 오류 발생: {e}")
+        return None
+# --------------------------------------------------------------------
+
 df_cleaned, low_b, up_b = process_pandas_eda(file_path)
 process_pandas_agg(df_cleaned)
+process_polars_lazy(file_path, low_b, up_b)
