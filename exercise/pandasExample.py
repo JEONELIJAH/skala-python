@@ -95,3 +95,28 @@ region
 # result = pd.merge(df_sales, df_cust, on='customer_id', how='left')
 # merge vs join 차이
 # merge: 컬럼 기준 | join: 인덱스 기준
+
+# 1) 복사본에서 실습
+df_work = df.copy()
+
+# 2) 서울 행 필터
+mask_seoul = df_work['region'].eq('서울')
+
+# 방법 A: 실수형으로 바꾼 뒤 계산 (가장 깔끔)
+df_work['amount'] = df_work['amount'].astype('float64')      # int64 -> float64로 미리 변경
+df_work.loc[mask_seoul, 'amount'] = df_work.loc[mask_seoul, 'amount'] * 1.1
+
+# 확인
+print(df_work.dtypes)
+
+# 방법 B: amount를 int로 유지해야 한다면 반올림 후 int 캐스팅
+df_work2 = df.copy()
+df_work2.loc[mask_seoul, 'amount'] = (
+    (df_work2.loc[mask_seoul, 'amount'].astype('float64') * 1.1)
+    .round(0)
+    .astype('Int64')   # pandas nullable int
+)
+
+# 체인 할당 쓰고 싶을 때(원본 수정 X)도 .copy()를 꼭 붙이고, 계산 끝에 타입 맞추기
+df_seoul = df.loc[df['region'] == '서울'].copy()
+df_seoul['amount'] = (df_seoul['amount'].astype('float64') * 1.1)
