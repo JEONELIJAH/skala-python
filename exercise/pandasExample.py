@@ -109,6 +109,15 @@ df_work.loc[mask_seoul, 'amount'] = df_work.loc[mask_seoul, 'amount'] * 1.1
 # 확인
 print(df_work.dtypes)
 
+"""
+region            category
+category               str
+amount             float64
+month       datetime64[us]
+Category               str
+dtype: object
+"""
+
 # 방법 B: amount를 int로 유지해야 한다면 반올림 후 int 캐스팅
 df_work2 = df.copy()
 df_work2.loc[mask_seoul, 'amount'] = (
