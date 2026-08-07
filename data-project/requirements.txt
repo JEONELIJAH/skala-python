@@ -11,3 +11,6 @@ ruff
 # 데이터 저장 및 파일 I/O (CSV, Parquet)
 pandas
 pyarrow
+
+polars
+duckdb
