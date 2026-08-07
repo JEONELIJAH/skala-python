@@ -1,7 +1,7 @@
 """
 프로그램명: 뉴욕 택시 데이터 시각화 모듈 (EDA 및 인터랙티브 차트)
 파일명: visualizer.py
-작성자: 전우진
+작성자: 1조
 작성일: 2026-08-07
 프로그램 설명: 
   - 정제된 뉴욕 택시 데이터(cleaned_tripdata.parquet)를 활용합니다.
@@ -113,7 +113,7 @@ def create_eda_subplots(df, output_image_path):
         axes[1, 1].set_title('4) 전체 수치형 변수 상관관계 (Heatmap)')
         
         # 축 라벨이 길어서 겹치지 않도록 폰트 크기 조절 및 회전
-        axes[1, 1].tick_params(axis='x', rotation=45, labelsize=7)
+        axes[1, 1].set_xticklabels(axes[1, 1].get_xticklabels(), rotation=45, ha='right', rotation_mode='anchor', fontsize=7)
         axes[1, 1].tick_params(axis='y', labelsize=7)
 
         plt.tight_layout()
