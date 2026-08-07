@@ -16,3 +16,15 @@ df['region'] = df['region'].astype('category')
 df['amount'] # Series
 df[['region','amount']] # DataFrame
 df.loc[df['amount']>1000] # 조건 필터
+
+'''
+Data columns (total 5 columns):
+ #   Column    Non-Null Count  Dtype
+---  ------    --------------  -----
+ 0   region    100 non-null    str  
+ 1   category  98 non-null     str  
+ 2   amount    100 non-null    int64
+ 3   month     99 non-null     str  
+ 4   Category  1 non-null      str  
+dtypes: int64(1), str(4)
+'''
