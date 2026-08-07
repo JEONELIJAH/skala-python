@@ -1,5 +1,7 @@
 # 기초 EDA 패턴
 import pandas as pd
+from time import perf_counter
+
 df = pd.read_json('./practice/data/Python_Practice2_Data.json')
 
 # 기초 확인
@@ -129,3 +131,29 @@ df_work2.loc[mask_seoul, 'amount'] = (
 # 체인 할당 쓰고 싶을 때(원본 수정 X)도 .copy()를 꼭 붙이고, 계산 끝에 타입 맞추기
 df_seoul = df.loc[df['region'] == '서울'].copy()
 df_seoul['amount'] = (df_seoul['amount'].astype('float64') * 1.1)
+
+# 이 데이터는 보통 category 컬럼 사용
+text_col = "category" if "category" in df.columns else "name"
+
+df2 = df.copy()
+s = df2[text_col].astype("string").fillna("")
+
+# 1) 느린 방법 (apply)
+df2["clean_apply"] = s.apply(lambda x: x.replace(" ", ""))
+
+# 2) 빠른 방법 (벡터화)
+df2["clean_vec"] = s.str.replace(" ", "", regex=False)
+
+# 속도 비교
+def bench(func, reps=5000):
+    t0 = perf_counter()
+    for _ in range(reps):
+        func()
+    return (perf_counter() - t0) / reps
+
+# 반복 측정(초)
+t_apply = bench(lambda: s.apply(lambda x: x.replace(" ", "")))
+t_vec   = bench(lambda: s.str.replace(" ", "", regex=False))
+
+print(f"apply avg: {t_apply*1e6:.2f} µs")
+print(f"vectorized avg: {t_vec*1e6:.2f} µs")
