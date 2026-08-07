@@ -71,4 +71,30 @@ def process_pandas_eda(csv_path):
         sys.exit(1)
 # --------------------------------------------------------------------
 
-process_pandas_eda(file_path)
+# 2) Pandas groupby 및 named aggregation
+# --------------------------------------------------------------------
+def process_pandas_agg(df):
+    """
+    정제된 데이터를 그룹화하고 Named aggregation을 적용합니다.
+    """
+    try:
+        print("\n--- 2. Pandas Named Aggregation ---")
+        
+        # region, category별로 묶은 뒤, 집계 결과의 컬럼명을 직접 지정합니다.
+        # 총매출 내림차순으로 정렬하고, reset_index()를 사용하여 0-base 인덱싱을 합니다.
+        pd_result = df.groupby(['region', 'category']).agg(
+            total=('amount', 'sum'),
+            mean=('amount', 'mean'),
+            count=('amount', 'count')
+        ).sort_values(by='total', ascending=False).reset_index()
+        
+        print(pd_result.head())
+        return pd_result
+    
+    except Exception as e:
+        logger.error(f"❌ Pandas 집계 중 오류 발생: {e}")
+        return None
+# --------------------------------------------------------------------
+
+df_cleaned, low_b, up_b = process_pandas_eda(file_path)
+process_pandas_agg(df_cleaned)
