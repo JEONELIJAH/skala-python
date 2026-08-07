@@ -50,3 +50,48 @@ print(f'이상치 {(~df["amount"].between(lo,hi)).sum()}건 제거')
 '''
 이상치 1건 제거
 '''
+
+# 집계·결합 실전
+# 다중 집계 + 컬럼명 지정 (monthly)
+monthly = df.groupby('month').agg(
+    revenue=('amount','sum'),
+    cnt=('amount','count'),
+    avg=('amount','mean')
+).reset_index()
+
+print(f"\n{monthly}\n")
+
+"""
+       month  revenue  cnt          avg
+0 2024-01-01    22690   23   986.521739
+1 2024-02-01    26870   27   995.185185
+2 2024-03-01    23500   22  1068.181818
+3 2024-04-01    27190   26  1045.769231
+"""
+
+# pivot_table
+pivot = df.pivot_table(
+    values='amount', index='region',
+    columns='category', aggfunc='sum',
+    fill_value=0)
+
+print(f"\n{pivot}\n")
+
+"""
+category    식품    의류     전자
+region                     
+             0   680      0
+광주        1620  2450   4830
+대구        1620  5170   5870
+대전        1270  3740   4810
+부산        1330  4800   4800
+서울        2390  5570  12100
+세종        1920  2470   5750
+울산        1360  3070   7270
+인천        1630  4550   8350
+"""
+
+# merge (LEFT JOIN)
+# result = pd.merge(df_sales, df_cust, on='customer_id', how='left')
+# merge vs join 차이
+# merge: 컬럼 기준 | join: 인덱스 기준
