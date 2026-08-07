@@ -40,8 +40,6 @@ def process_pandas_eda(csv_path):
         
         print("\n[결측치 확인 - isnull().sum()]")
         print(df.isnull().sum())
-        print("\n[결측치 확인 - isna().sum()]")
-        print(df.isna().sum())
 
         # 제거하기 전 df의 크기
         before_cnt = len(df)
@@ -156,7 +154,71 @@ def process_duckdb_sql(csv_path, lower, upper):
         return None
 # --------------------------------------------------------------------
 
-df_cleaned, low_b, up_b = process_pandas_eda(file_path)
-process_pandas_agg(df_cleaned)
-process_polars_lazy(file_path, low_b, up_b)
-process_duckdb_sql(file_path, low_b, up_b)
+
+# 5) timeit 사용 세 도구 성능 비교
+# --------------------------------------------------------------------
+def run_performance_test(csv_path, lower, upper, iters=5):
+    """
+    timeit을 통해 세 가지 도구의 실행 시간을 측정합니다.
+    """
+    print(f"\n--- 5. 세 도구 성능 비교 측정 시작 (반복 횟수: {iters}회) ---")
+    
+    def time_pandas():
+        df = pd.read_csv(csv_path)
+        df_clean = df[df['amount'].between(lower, upper)]
+        df_clean.groupby(['region', 'category']).agg(
+            total=('amount', 'sum'),
+            mean=('amount', 'mean'),
+            count=('amount', 'count')
+        ).sort_values(by='total', ascending=False).reset_index()
+
+    def time_polars():
+        (
+            pl.scan_csv(csv_path)
+            .filter(pl.col('amount').is_between(lower, upper))
+            .group_by(['region', 'category'])
+            .agg(
+                pl.col('amount').sum().alias('total'),
+                pl.col('amount').mean().alias('mean'),
+                pl.col('amount').count().alias('count')
+            )
+            .sort('total', descending=True)
+            .collect() # collect()를 호출해 실행합니다.
+        )
+
+    def time_duckdb():
+        duckdb.sql(f"""
+            SELECT region, 
+                category, 
+                SUM(amount) AS total, 
+                AVG(amount) AS mean, 
+                COUNT(amount) AS count
+            FROM read_csv_auto('{csv_path}')
+            WHERE amount BETWEEN {lower} AND {upper}
+            GROUP BY region, category
+            ORDER BY total DESC""").df()
+
+    try:
+        # 공정한 비교를 위해 세 도구 모두 number 값을 동일하게 맞춥니다.
+        pd_time = timeit.timeit(time_pandas, number=iters)
+        pl_time = timeit.timeit(time_polars, number=iters)
+        ddb_time = timeit.timeit(time_duckdb, number=iters)
+
+        print(f"🐼 Pandas 실행 시간 : {pd_time:.5f}초")
+        print(f"🐻‍❄️ Polars 실행 시간 : {pl_time:.5f}초")
+        print(f"🦆 DuckDB 실행 시간 : {ddb_time:.5f}초")
+        
+    except Exception as e:
+        logger.error(f"❌ 성능 측정 중 오류 발생: {e}")
+# --------------------------------------------------------------------
+
+
+# 6) 메인 실행 및 결과 테스트
+# --------------------------------------------------------------------
+if __name__ == "__main__":
+    # 파이프라인 실행
+    df_cleaned, low_b, up_b = process_pandas_eda(file_path)
+    process_pandas_agg(df_cleaned)
+    process_polars_lazy(file_path, low_b, up_b)
+    process_duckdb_sql(file_path, low_b, up_b)
+    run_performance_test(file_path, low_b, up_b)
