@@ -46,3 +46,7 @@ IQR = Q3 - Q1
 lo, hi = Q1 - 1.5*IQR, Q3 + 1.5*IQR
 df_clean = df[df['amount'].between(lo, hi)]
 print(f'이상치 {(~df["amount"].between(lo,hi)).sum()}건 제거')
+
+'''
+이상치 1건 제거
+'''
