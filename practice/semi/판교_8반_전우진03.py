@@ -127,6 +127,36 @@ def process_polars_lazy(csv_path, lower, upper):
         return None
 # --------------------------------------------------------------------
 
+# 4) DuckDB SQL로 동일 집계 작성
+# --------------------------------------------------------------------
+def process_duckdb_sql(csv_path, lower, upper):
+    """
+    DuckDB를 활용하여 표준 SQL 구문으로 동일한 집계를 수행합니다.
+    """
+    try:
+        print("\n--- 4. DuckDB SQL 집계 ---")
+        
+        # SQL 구문으로 그룹화 및 정렬 조건을 작성했습니다.
+        # 쿼리를 실행한 뒤 결과를 Pandas DataFrame으로 변환하여 출력합니다.
+        ddb_result = duckdb.sql(f"""
+            SELECT region, 
+                category, 
+                SUM(amount) AS total, 
+                AVG(amount) AS mean, 
+                COUNT(amount) AS count
+            FROM read_csv_auto('{csv_path}')
+            WHERE amount BETWEEN {lower} AND {upper}
+            GROUP BY region, category
+            ORDER BY total DESC""").df()
+        print(ddb_result.head())
+        return ddb_result
+    
+    except Exception as e:
+        logger.error(f"❌ DuckDB 처리 중 오류 발생: {e}")
+        return None
+# --------------------------------------------------------------------
+
 df_cleaned, low_b, up_b = process_pandas_eda(file_path)
 process_pandas_agg(df_cleaned)
 process_polars_lazy(file_path, low_b, up_b)
+process_duckdb_sql(file_path, low_b, up_b)
