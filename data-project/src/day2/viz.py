@@ -14,6 +14,7 @@ import sys
 import logging
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
 # 시각화 패키지
 import matplotlib.pyplot as plt
@@ -25,8 +26,10 @@ import plotly.express as px
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-cleaned_file_path = '/Users/jeon/skala/projects/skala-python/data-project/cleaned_tripdata.parquet'
-current_dir = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR.parent.parent
+cleaned_file_path = PROJECT_ROOT / 'data' / 'processed' / 'cleaned_tripdata.parquet'
+output_dir = BASE_DIR / 'output' / 'yellow_taxi_2026_05'
 
 # 폰트 설정 (Mac 환경 맞춤 설정)
 plt.rcParams['font.family'] = 'AppleGothic'
@@ -41,7 +44,7 @@ def load_cleaned_data(parquet_path):
         df = pd.read_parquet(parquet_path)
         logger.info(f"데이터 로딩 완료: 총 {len(df):,}행")
         return df
-    except Exception as e:
+    except (OSError, ImportError, ValueError) as e:
         logger.error(f"❌ 데이터 로딩 실패: {e}")
         sys.exit(1)
 # --------------------------------------------------------------------
@@ -52,6 +55,9 @@ def load_cleaned_data(parquet_path):
 def create_eda_subplots(df, output_image_path):
     try:
         print("\n--- [1] EDA 시각화 4종 (Seaborn 2x2 Subplots) 생성 ---")
+        output_image_path = Path(output_image_path)
+        output_image_path.parent.mkdir(parents=True, exist_ok=True)
+        df = df.copy()
         fig, axes = plt.subplots(2, 2, figsize=(14, 10))
         fig.suptitle('Yellow Taxi Data EDA Summary (2x2 Subplots)', fontsize=16)
 
@@ -72,7 +78,7 @@ def create_eda_subplots(df, output_image_path):
         # 3. showfliers=False를 통해 이상치 점을 숨겨서 박스 자체의 비교를 극대화
         sns.boxplot(
             x='payment_name', y='total_amount', data=pay_filtered, 
-            ax=axes[0, 1], palette='Set2', hue='payment_name', legend=False,
+            ax=axes[0, 1], palette='Set2', hue='payment_name',
             showfliers=False  # 핵심: 까만 점 제거
         )
         axes[0, 1].set_title('2) 결제 수단별 총 요금 분포 (이상치 제외)')
@@ -102,7 +108,7 @@ def create_eda_subplots(df, output_image_path):
         numeric_df = df.select_dtypes(include=[np.number])
         
         # 2. 대용량 렌더링 속도 개선을 위한 샘플링
-        sub_df = numeric_df.sample(n=10000, random_state=42)
+        sub_df = numeric_df.sample(n=min(10000, len(numeric_df)), random_state=42)
         
         # 3. 15개가 넘는 컬럼을 한 화면에 담기 위해 폰트 크기 대폭 축소
         sns.heatmap(
@@ -121,7 +127,7 @@ def create_eda_subplots(df, output_image_path):
         print(f"✅ 2x2 서브플롯 시각화 저장 완료: {output_image_path}")
         plt.close()
 
-    except Exception as e:
+    except (OSError, KeyError, TypeError, ValueError) as e:
         logger.error(f"❌ 시각화 생성 중 오류 발생: {e}")
 # --------------------------------------------------------------------
 
@@ -131,9 +137,11 @@ def create_eda_subplots(df, output_image_path):
 def create_and_save_plotly_chart(df, html_output_path):
     try:
         print("\n--- [2] Plotly 인터랙티브 차트 작성 및 HTML 저장 ---")
+        html_output_path = Path(html_output_path)
+        html_output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # 분석 편의를 위해 샘플링 및 요약 (결제 타입별 평균 거리와 요금)
-        sample_df = df.sample(n=10000, random_state=42)
+        sample_df = df.sample(n=min(10000, len(df)), random_state=42)
         
         fig = px.scatter(
             sample_df, x='trip_distance', y='total_amount', color='payment_type',
@@ -145,15 +153,14 @@ def create_and_save_plotly_chart(df, html_output_path):
         fig.write_html(html_output_path)
         print(f"✅ Plotly 인터랙티브 차트 저장 완료 (.html): {html_output_path}")
 
-    except Exception as e:
+    except (OSError, KeyError, TypeError, ValueError) as e:
         logger.error(f"❌ Plotly 차트 생성 중 오류 발생: {e}")
 # --------------------------------------------------------------------
 
 
 if __name__ == "__main__":
-    
-    image_file = os.path.join(current_dir, 'eda_subplots.png')
-    html_file = os.path.join(current_dir, 'taxi_interactive_chart.html')
+    image_file = output_dir / 'eda_subplots.png'
+    html_file = output_dir / 'taxi_interactive_chart.html'
 
     # 1. 정제된 Parquet 데이터 로드
     df_clean = load_cleaned_data(cleaned_file_path)
