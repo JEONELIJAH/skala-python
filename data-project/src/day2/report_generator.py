@@ -11,19 +11,28 @@
 """
 import argparse
 import logging
-import sys
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 
-sys.path.append(str(Path(__file__).resolve().parent))
-
-from clean import run_performance_test
-from ml_pipeline import run_ml_ablation_pipeline
-from statistical_analyzer import analyze_dispute_zones, run_basic_statistics_and_ttest
-from viz import create_and_save_plotly_chart, create_eda_subplots
+if __package__:
+    from .clean import run_performance_test
+    from .ml_pipeline import run_ml_ablation_pipeline
+    from .statistical_analyzer import (
+        analyze_dispute_zones,
+        run_basic_statistics_and_ttest,
+    )
+    from .viz import create_and_save_plotly_chart, create_eda_subplots
+else:  # 파일을 직접 실행할 때도 지원합니다.
+    from clean import run_performance_test
+    from ml_pipeline import run_ml_ablation_pipeline
+    from statistical_analyzer import (
+        analyze_dispute_zones,
+        run_basic_statistics_and_ttest,
+    )
+    from viz import create_and_save_plotly_chart, create_eda_subplots
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -108,8 +117,10 @@ def run_report(
             lines.append(f"- 원본 파일이 없어 성능 비교를 생략했습니다: {raw_path}")
 
     report_text = "\n".join(lines) + "\n"
-    Path(output_report).write_text(report_text, encoding="utf-8")
+    report_path = Path(output_report)
+    report_path.write_text(report_text, encoding="utf-8")
     logger.info("✅ report.md 생성 완료: %s", output_report)
+    return report_path
 
 def parse_args():
     p = argparse.ArgumentParser(description="뉴욕 택시 Day2 분석 자동 보고서 생성")

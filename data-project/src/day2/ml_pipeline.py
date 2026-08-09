@@ -101,7 +101,7 @@ def run_ml_ablation_pipeline(df, model_save_path):
             "acc_a": acc_a, "f1_a": f1_a,
             "acc_b": acc_b, "f1_b": f1_b,
         }
-    except Exception as e:
+    except (OSError, ImportError, ValueError, KeyError, TypeError) as e:
         logger.error(f"머신러닝 파이프라인 실행 중 오류 발생: {e}")
         return None
 

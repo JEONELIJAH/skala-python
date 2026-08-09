@@ -9,7 +9,6 @@
     Plotly를 활용한 인터랙티브 차트를 생성합니다.
 """
 
-import os
 import sys
 import logging
 import pandas as pd
@@ -18,9 +17,8 @@ from pathlib import Path
 
 # 시각화 패키지
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import seaborn as sns
 import plotly.express as px
+import seaborn as sns
 
 # 로그 설정
 logging.basicConfig(level=logging.INFO)

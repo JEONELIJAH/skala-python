@@ -14,7 +14,7 @@ import logging
 from pathlib import Path
 
 import pandas as pd
-from scipy.stats import ttest_ind, chi2_contingency
+from scipy.stats import chi2_contingency, ttest_ind
 
 # 로그 설정
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")

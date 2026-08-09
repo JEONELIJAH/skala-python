@@ -13,6 +13,7 @@ import sys
 import timeit
 import logging
 import urllib.request
+import urllib.error
 from pathlib import Path
 
 import pandas as pd
@@ -257,8 +258,10 @@ def compare_and_save(pd_df, pl_df, output_path):
         output_path.parent.mkdir(parents=True, exist_ok=True)
         pl_df.write_parquet(output_path)
         print(f"💾 정제된 데이터를 저장했습니다: {output_path}")
+        return output_path
     except (OSError, ValueError, pl.exceptions.PolarsError) as e:
         logger.error(f"❌ 파일 저장 중 오류 발생: {e}")
+        return None
 # --------------------------------------------------------------------
 
 
@@ -309,14 +312,41 @@ def run_performance_test(file_path, iters=5, return_metrics=False):
 # --------------------------------------------------------------------
 
 
-# 5) 메인 실행
+# 5) 전처리 파이프라인
 # --------------------------------------------------------------------
-if __name__ == "__main__":
+def run_cleaning_pipeline(run_performance=False, iters=3):
+    """데이터 다운로드부터 정제 결과 저장까지 순서대로 실행합니다."""
+    if iters < 1:
+        raise ValueError("성능 비교 반복 횟수는 1 이상이어야 합니다.")
+
     download_data()
-    
+
     pd_cleaned = process_pandas(LOCAL_FILE)
     pl_cleaned = process_polars(LOCAL_FILE)
-    
-    if pd_cleaned is not None and pl_cleaned is not None:
-        compare_and_save(pd_cleaned, pl_cleaned, OUTPUT_FILE)
-        run_performance_test(LOCAL_FILE, iters=3)
+
+    if pd_cleaned is None or pl_cleaned is None:
+        raise RuntimeError("Pandas·Polars 데이터 전처리에 실패했습니다.")
+
+    saved_path = compare_and_save(pd_cleaned, pl_cleaned, OUTPUT_FILE)
+    if saved_path is None:
+        raise RuntimeError("정제된 Parquet 파일 저장에 실패했습니다.")
+
+    performance = None
+    if run_performance:
+        performance = run_performance_test(LOCAL_FILE, iters=iters, return_metrics=True)
+        if performance is None:
+            raise RuntimeError("Pandas·Polars 성능 비교에 실패했습니다.")
+
+    return {
+        "pandas_rows": len(pd_cleaned),
+        "polars_rows": pl_cleaned.height,
+        "output_path": saved_path,
+        "performance": performance,
+    }
+# --------------------------------------------------------------------
+
+
+# 6) 메인 실행
+# --------------------------------------------------------------------
+if __name__ == "__main__":
+    run_cleaning_pipeline(run_performance=True, iters=3)
